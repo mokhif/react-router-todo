@@ -1,5 +1,3 @@
-import { Link } from "react-router";
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-red-300 flex items-center justify-center">

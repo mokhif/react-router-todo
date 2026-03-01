@@ -1,122 +1,174 @@
 // app/routes/register.jsx
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Link } from "react-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+
+const schema = z
+  .object({
+    name: z.string(),
+    email: z.string().regex(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/, {
+      message: "Please enter a valid email address.",
+    }),
+    password: z.string().min(6, "At least 6 characters"),
+    confirmPassword: z.string().min(6),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Password don't match",
+    path: ["confirmPassword"],
+  });
 
 export default function Register() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(schema),
+  });
+
+  const onSubmit = (data) => console.log(data);
+
   return (
-    <div className="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
-      {/* Card */}
-      <div className="w-full max-w-[440px] bg-white shadow-xl rounded-xl overflow-hidden border border-slate-200">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="min-h-screen flex items-center justify-center bg-background px-4"
+    >
+      <div className="w-full max-w-md">
         {/* Header */}
-        <div className="pt-8 px-8 pb-6 text-center">
-          <h1 className="text-slate-900 text-3xl font-bold tracking-tight mb-2">
-            Create your account
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Get started
           </h1>
-          <p className="text-slate-500 text-sm">
-            Join us to start organizing your daily tasks efficiently.
+          <p className="text-muted-foreground">
+            Create your todo account in seconds
           </p>
         </div>
 
-        {/* Form */}
-        <div className="px-8 pb-8 space-y-4">
+        {/* Card */}
+        <Card className="p-6 border-border bg-card space-y-4">
           {/* Full Name */}
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">
-              Full Name
-            </label>
-            <input
-              type="text"
-              placeholder="John Doe"
-              className="w-full px-4 h-11 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            />
+          <div className="space-y-2">
+            <Field data-invalid={!!errors.name}>
+              <FieldLabel
+                htmlFor="name"
+                className="text-foreground font-medium"
+              >
+                Full name
+              </FieldLabel>
+              <Input
+                {...register("name")}
+                id="name"
+                type="text"
+                placeholder="John Doe"
+                aria-invalid={!!errors.name}
+                className="bg-background text-foreground border-border"
+              />
+              <FieldDescription style={{ color: errors.name ? "red" : "" }}>
+                {errors.name ? errors.name.message : "Enter your full name"}
+              </FieldDescription>
+            </Field>
           </div>
 
           {/* Email */}
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">Email</label>
-            <input
-              type="email"
-              placeholder="name@example.com"
-              className="w-full px-4 h-11 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            />
+          <div className="space-y-2">
+            <Field data-invalid={!!errors.email}>
+              <FieldLabel
+                htmlFor="email"
+                className="text-foreground font-medium"
+              >
+                Email
+              </FieldLabel>
+              <Input
+                {...register("email")}
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                aria-invalid={!!errors.email}
+                className="bg-background text-foreground border-border"
+              />
+              <FieldDescription style={{ color: errors.email ? "red" : "" }}>
+                {errors.email ? errors.email.message : "Enter your email"}
+              </FieldDescription>
+            </Field>
           </div>
 
           {/* Password */}
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">
-              Password
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              className="w-full px-4 h-11 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            />
+          <div className="space-y-2">
+            <Field data-invalid={!!errors.password}>
+              <FieldLabel
+                htmlFor="password"
+                className="text-foreground font-medium"
+              >
+                Password
+              </FieldLabel>
+              <Input
+                {...register("password")}
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                aria-invalid={!!errors.password}
+                className="bg-background text-foreground border-border"
+              />
+              <FieldDescription style={{ color: errors.password ? "red" : "" }}>
+                {errors.password
+                  ? errors.password.message
+                  : "At least 6 characters"}
+              </FieldDescription>
+            </Field>
           </div>
 
           {/* Confirm Password */}
-          <div className="space-y-1.5 pb-2">
-            <label className="text-sm font-medium text-slate-700">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              className="w-full px-4 h-11 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            />
+          <div className="space-y-2">
+            <Field data-invalid={!!errors.confirmPassword}>
+              <FieldLabel
+                htmlFor="confirm-password"
+                className="text-foreground font-medium"
+              >
+                Confirm password
+              </FieldLabel>
+              <Input
+                {...register("confirmPassword")}
+                id="confirm-password"
+                type="password"
+                placeholder="••••••••"
+                aria-invalid={!!errors.confirmPassword}
+                className="bg-background text-foreground border-border"
+              />
+              <FieldDescription
+                style={{ color: errors.confirmPassword ? "red" : "" }}
+              >
+                {errors.confirmPassword
+                  ? errors.confirmPassword.message
+                  : "Re-enter your password"}
+              </FieldDescription>
+            </Field>
           </div>
 
           {/* Submit */}
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold h-11 rounded-lg transition-all active:scale-[0.98]">
-            Create Account
-          </button>
+          <Button
+            type="submit"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+          >
+            Create account
+          </Button>
 
-          {/* Divider */}
-          <div className="relative py-2">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-slate-500">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
-          {/* Social Buttons */}
-          <div className="grid grid-cols-2 gap-4">
-            <button className="flex items-center justify-center gap-2 h-11 px-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-slate-700 text-sm font-medium">
-              Google
-            </button>
-            <button className="flex items-center justify-center gap-2 h-11 px-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-slate-700 text-sm font-medium">
-              GitHub
-            </button>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="py-6 bg-slate-50 border-t border-slate-200 text-center">
-          <p className="text-sm text-slate-600">
+          {/* Footer */}
+          <div className="text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <a
-              href="/login"
-              className="text-blue-600 font-semibold hover:underline underline-offset-4"
+            <Link
+              to="/login"
+              className="text-primary hover:underline font-medium"
             >
-              Sign in instead
-            </a>
-          </p>
-        </div>
+              Sign in
+            </Link>
+          </div>
+        </Card>
       </div>
-
-      {/* Legal */}
-      <div className="mt-8 text-center text-xs text-slate-500 max-w-xs leading-relaxed">
-        By creating an account, you agree to our{" "}
-        <a href="/terms" className="underline">
-          Terms of Service
-        </a>{" "}
-        and{" "}
-        <a href="/privacy" className="underline">
-          Privacy Policy
-        </a>
-        .
-      </div>
-    </div>
+    </form>
   );
 }

@@ -7,6 +7,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import axios from "axios";
+import { useNavigate } from "react-router";
 
 const schema = z
   .object({
@@ -23,6 +25,7 @@ const schema = z
   });
 
 export default function Register() {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -31,8 +34,16 @@ export default function Register() {
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = (data) => console.log(data);
-
+  const onSubmit = async (data) => {
+    try {
+      await axios.post("http://localhost:5000/register", data, {
+        withCredentials: true,
+      });
+      navigate("/home");
+    } catch (error) {
+      console.error(error.response.data);
+    }
+  };
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}

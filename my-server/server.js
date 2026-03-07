@@ -34,7 +34,20 @@ app.post("/register", async (req, res) => {
     res.status(400).json({ msg: `error ${error.message}` });
   }
 });
-
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ msg: "User does not exist" });
+    const passwordMatch = await user.comparePassword(password);
+    if (!passwordMatch)
+      return res.status(400).json({ msg: "Password does not match" });
+    generateToken(res, user._id);
+    res.status(200).json({ msg: "Login successful" });
+  } catch (error) {
+    res.status(400).json({ msg: `error ${error.message}` });
+  }
+});
 async function main() {
   await mongoose.connect(process.env.MONGODB_URI);
   console.log("connected to mongodb");

@@ -4,8 +4,38 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router";
-
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router";
+import axios from "axios";
+import { useState } from "react";
+const schema = z.object({
+  email: z.string().regex(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/, {
+    message: "Please enter a valid email address.",
+  }),
+  password: z.string().min(6, "At least 6 characters"),
+});
 export default function Login() {
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ resolver: zodResolver(schema) });
+
+  const onSubmit = async (data) => {
+    try {
+      await axios.post("http://localhost:5000/login", data, {
+        withCredentials: true,
+      });
+      navigate("/home");
+    } catch (error) {
+      console.error(error.response.data);
+      setError(error.response.data.msg);
+    }
+  };
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
@@ -18,19 +48,26 @@ export default function Login() {
         </div>
 
         {/* Card */}
-        <Card className="p-6 border-border bg-card space-y-5">
+        <form
+          className="p-6 border-border bg-card space-y-5"
+          onSubmit={handleSubmit(onSubmit)}
+        >
           {/* Email */}
           <div className="space-y-2">
             <Label htmlFor="email" className="text-foreground font-medium">
               Email
             </Label>
             <Input
+              {...register("email")}
               id="email"
               name="email"
               type="email"
               placeholder="you@example.com"
               className="bg-background text-foreground border-border"
             />
+            {errors.email && (
+              <p style={{ color: "red" }}>{errors.email.message}</p>
+            )}
           </div>
 
           {/* Password */}
@@ -39,12 +76,14 @@ export default function Login() {
               Password
             </Label>
             <Input
+              {...register("password")}
               id="password"
               name="password"
               type="password"
               placeholder="••••••••"
               className="bg-background text-foreground border-border"
             />
+            {error && <p style={{ color: "red" }}>{error}</p>}
           </div>
 
           {/* Submit */}
@@ -65,7 +104,7 @@ export default function Login() {
               Create one
             </Link>
           </div>
-        </Card>
+        </form>
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import User from "./src/models/user.js";
+import protect from "./src/middleware/auth.js";
 const app = express();
 const port = 5000;
 app.use(cookieParser());
@@ -48,6 +49,11 @@ app.post("/login", async (req, res) => {
     res.status(400).json({ msg: `error ${error.message}` });
   }
 });
+
+app.get("/home", protect, (req, res) => {
+  res.status(200).json({ msg: "Welcome", user: req.user });
+});
+
 async function main() {
   await mongoose.connect(process.env.MONGODB_URI);
   console.log("connected to mongodb");

@@ -7,6 +7,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import User from "./src/models/user.js";
 import protect from "./src/middleware/auth.js";
+import user from "./src/models/user.js";
 const app = express();
 const port = 5000;
 app.use(cookieParser());
@@ -50,8 +51,16 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.get("/me", protect, (req, res) => {
+  res.status(200).json(req.user);
+});
+
 app.get("/home", protect, (req, res) => {
   res.status(200).json({ msg: "Welcome", user: req.user });
+});
+//removing cookie
+app.post("/logout", (req, res) => {
+  res.clearCookie("token").status(200).json({ msg: "Logged out successfully" });
 });
 
 async function main() {

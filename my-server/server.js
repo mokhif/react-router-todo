@@ -7,7 +7,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import User from "./src/models/user.js";
 import protect from "./src/middleware/auth.js";
-import user from "./src/models/user.js";
+import Todo from "./src/models/todo.js";
 const app = express();
 const port = 5000;
 app.use(cookieParser());
@@ -33,7 +33,7 @@ app.post("/register", async (req, res) => {
     generateToken(res, user._id);
     res.status(200).json({ msg: "Registered successfully" });
   } catch (error) {
-    res.status(400).json({ msg: `error ${error.message}` });
+    res.status(400).json({ msg: `error registering ${error.message}` });
   }
 });
 app.post("/login", async (req, res) => {
@@ -63,6 +63,50 @@ app.post("/logout", (req, res) => {
   res.clearCookie("token").status(200).json({ msg: "Logged out successfully" });
 });
 
+//Todo Crud Section
+//Creating a Todo
+app.post("/todos", protect, async (req, res) => {
+  try {
+    const todo = await Todo.create({
+      ...req.body,
+      user: req.user._id,
+    });
+    res.status(201).json(todo);
+  } catch (error) {
+    res.status(400).json({ msg: `error ${error.message}` });
+  }
+});
+//requesting all todos
+app.get("/todos", protect, async (req, res) => {
+  try {
+    const todos = await Todo.find({ user: req.user._id });
+    res.status(200).json(todos);
+  } catch (error) {
+    res.status(400).json({ msg: `error ${error.message}` });
+  }
+});
+//deleting a todo
+app.delete("/todos/:id", protect, async (req, res) => {
+  try {
+    const deletedTodo = await Todo.findByIdAndDelete(req.params.id);
+    if (!deletedTodo) return res.status(404).json({ msg: "Todo not found" });
+    res.status(200).json(deletedTodo);
+  } catch (error) {
+    res.status(400).json({ msg: `error ${error.message}` });
+  }
+});
+//update a todo
+app.put("/todos/:id", protect, async (req, res) => {
+  try {
+    const updateTodo = await Todo.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    if (!updateTodo) return res.status(404).json({ msg: "Todo not found" });
+    res.status(200).json(updateTodo);
+  } catch (error) {
+    res.status(400).json({ msg: `error ${error.message}` });
+  }
+});
 async function main() {
   await mongoose.connect(process.env.MONGODB_URI);
   console.log("connected to mongodb");

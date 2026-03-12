@@ -11,16 +11,22 @@ export default function HomePage() {
   const [input, setInput] = useState("");
   const [filter, setFilter] = useState("all");
   useEffect(() => {
-    const checkAuth = async () => {
+    const AuthAndFetchTodos = async () => {
       try {
         await axios.get("http://localhost:5000/me", { withCredentials: true });
+        const todos = await axios.get("http://localhost:5000/todos", {
+          withCredentials: true,
+        });
+        setTodos(todos.data);
+        console.log(todos.data);
       } catch (error) {
         navigate("/login");
         console.error(error.response.data);
       }
     };
-    checkAuth();
+    AuthAndFetchTodos();
   }, []);
+
   const handlLogout = async () => {
     try {
       await axios.post(
@@ -93,17 +99,22 @@ export default function HomePage() {
 
         {/* Todo List */}
         <div className="space-y-2">
-          <Card className="p-4 border-border bg-card hover:bg-secondary/20 transition-colors group">
-            <div className="flex items-center gap-3">
-              <button className="shrink-0 w-6 h-6 rounded border-2 border-border hover:border-primary transition-all flex items-center justify-center">
-                <Check className="w-4 h-4 text-primary-foreground" />
-              </button>
-              <span className="flex-1 text-foreground">Sample task</span>
-              <button className="shrink-0 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100">
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          </Card>
+          {todos.map((todo) => (
+            <Card
+              key={todo._id}
+              className="p-4 border-border bg-card hover:bg-secondary/20 transition-colors group"
+            >
+              <div className="flex items-center gap-3">
+                <button className="shrink-0 w-6 h-6 rounded border-2 border-border hover:border-primary transition-all flex items-center justify-center">
+                  <Check className="w-4 h-4 text-primary-foreground" />
+                </button>
+                <span className="flex-1 text-foreground">{todo.title}</span>
+                <button className="shrink-0 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </Card>
+          ))}
         </div>
       </main>
     </div>

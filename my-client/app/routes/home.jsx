@@ -5,20 +5,25 @@ import { Card } from "@/components/ui/card";
 import { Check, Trash2, LogOut } from "lucide-react";
 import { useNavigate } from "react-router";
 import axios from "axios";
+
 export default function HomePage() {
   const navigate = useNavigate();
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [user, setUser] = useState(null);
+
   useEffect(() => {
     const AuthAndFetchTodos = async () => {
       try {
-        await axios.get("http://localhost:5000/me", { withCredentials: true });
+        const me = await axios.get("http://localhost:5000/me", {
+          withCredentials: true,
+        });
+        setUser(me.data);
         const todos = await axios.get("http://localhost:5000/todos", {
           withCredentials: true,
         });
         setTodos(todos.data);
-        console.log(todos.data);
+        console.log(user);
       } catch (error) {
         navigate("/login");
         console.error(error.response.data);
@@ -32,23 +37,23 @@ export default function HomePage() {
       await axios.post(
         "http://localhost:5000/logout",
         {},
-        {
-          withCredentials: true,
-        },
+        { withCredentials: true },
       );
       navigate("/login");
     } catch (error) {
       console.error(error.response.data);
     }
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/5">
-      {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0">
         <div className="max-w-3xl mx-auto px-4 py-6 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">My Tasks</h1>
-            <p className="text-muted-foreground text-sm mt-1">All caught up!</p>
+            <p className="text-muted-foreground text-sm mt-1">
+              Welcome back, {user?.name}!
+            </p>
           </div>
           <Button
             onClick={handlLogout}
@@ -62,9 +67,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-3xl mx-auto px-4 py-8">
-        {/* Input Section */}
         <Card className="p-6 mb-8 border-border bg-card shadow-sm">
           <div className="flex gap-2">
             <Input
@@ -80,24 +83,6 @@ export default function HomePage() {
           </div>
         </Card>
 
-        {/* Filter Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-border pb-4">
-          {["all", "active", "completed"].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-2 text-sm font-medium transition-colors capitalize ${
-                filter === f
-                  ? "text-primary border-b-2 border-primary -mb-4"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-
-        {/* Todo List */}
         <div className="space-y-2">
           {todos.map((todo) => (
             <Card

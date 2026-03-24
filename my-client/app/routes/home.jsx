@@ -5,8 +5,13 @@ import { Card } from "@/components/ui/card";
 import { Check, Trash2, LogOut } from "lucide-react";
 import { useNavigate } from "react-router";
 import axios from "axios";
-import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 export default function HomePage() {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [input, Setinput] = useState("");
   //Posting-Todo

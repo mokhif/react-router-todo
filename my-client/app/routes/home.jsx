@@ -5,15 +5,11 @@ import { Card } from "@/components/ui/card";
 import { Check, Trash2, LogOut } from "lucide-react";
 import { useNavigate } from "react-router";
 import axios from "axios";
-import {
-  QueryClient,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 export default function HomePage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [input, Setinput] = useState("");
+  const [input, setInput] = useState("");
   //Posting-Todo
   const mutation = useMutation({
     mutationFn: () =>
@@ -24,7 +20,7 @@ export default function HomePage() {
           { withCredentials: true },
         )
         .then((res) => res.data),
-    onSuccess: () => QueryClient.invalidateQueries(["todos"]),
+    onSuccess: () => queryClient.invalidateQueries(["todos"]),
   });
   const {
     data: user,

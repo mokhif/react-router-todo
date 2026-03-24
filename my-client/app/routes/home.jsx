@@ -5,32 +5,47 @@ import { Card } from "@/components/ui/card";
 import { Check, Trash2, LogOut } from "lucide-react";
 import { useNavigate } from "react-router";
 import axios from "axios";
-
+import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
 export default function HomePage() {
   const navigate = useNavigate();
-  const [todos, setTodos] = useState([]);
-  const [input, setInput] = useState("");
-  const [user, setUser] = useState(null);
-
+  const [input, Setinput] = useState("");
+  //Posting-Todo
+  const mutation = useMutation({
+    mutationFn: () =>
+      axios
+        .post(
+          "http://localhost:5000/todos",
+          { title: input },
+          { withCredentials: true },
+        )
+        .then((res) => res.data),
+    onSuccess: () => QueryClient.invalidateQueries(["todos"]),
+  });
+  const {
+    data: user,
+    isLoading: userLoading,
+    error: userError,
+  } = useQuery({
+    queryKey: ["user"],
+    queryFn: () =>
+      axios
+        .get("http://localhost:5000/me", { withCredentials: true })
+        .then((res) => res.data),
+  });
   useEffect(() => {
-    const AuthAndFetchTodos = async () => {
-      try {
-        const me = await axios.get("http://localhost:5000/me", {
-          withCredentials: true,
-        });
-        setUser(me.data);
-        const todos = await axios.get("http://localhost:5000/todos", {
-          withCredentials: true,
-        });
-        setTodos(todos.data);
-        console.log(user);
-      } catch (error) {
-        navigate("/login");
-        console.error(error.response.data);
-      }
-    };
-    AuthAndFetchTodos();
-  }, []);
+    if (userError) navigate("/login");
+  }, [userError]);
+  const {
+    data: todos,
+    isLoading: todoLoading,
+    error: todoError,
+  } = useQuery({
+    queryKey: ["todos"],
+    queryFn: () =>
+      axios
+        .get("http://localhost:5000/todos", { withCredentials: true })
+        .then((res) => res.data),
+  });
 
   const handlLogout = async () => {
     try {
@@ -84,7 +99,7 @@ export default function HomePage() {
         </Card>
 
         <div className="space-y-2">
-          {todos.map((todo) => (
+          {(todos || []).map((todo) => (
             <Card
               key={todo._id}
               className="p-4 border-border bg-card hover:bg-secondary/20 transition-colors group"

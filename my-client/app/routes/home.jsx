@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { Check, Trash2, LogOut } from "lucide-react";
 import { useNavigate } from "react-router";
 import axios from "axios";
 import { Pencil, CheckCheck } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
+import LoadingButton from "@/components/LoadingButton";
 export default function HomePage() {
   //Hooks
   const queryClient = useQueryClient();
@@ -53,7 +54,7 @@ export default function HomePage() {
   };
   //Adding Todo
 
-  const mutation = useMutation({
+  const mutationAdd = useMutation({
     mutationFn: () =>
       axios
         .post(
@@ -67,6 +68,7 @@ export default function HomePage() {
       setInput("");
     },
   });
+
   //Fetching User
 
   const { data: user, error: userError } = useQuery({
@@ -136,12 +138,22 @@ export default function HomePage() {
               onChange={(e) => setInput(e.target.value)}
               className="flex-1 bg-background text-foreground border-border placeholder:text-muted-foreground/50"
             />
-            <Button
-              onClick={() => mutation.mutate()}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6"
+            {/* {mutationAdd.isPending ? (
+              <Spinner />
+            ) : (
+              <Button
+                onClick={() => mutationAdd.mutate()}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6"
+              >
+                Add
+              </Button>
+            )} */}
+            <LoadingButton
+              onClick={() => mutationAdd.mutate()}
+              isPending={mutationAdd.isPending}
             >
               Add
-            </Button>
+            </LoadingButton>
           </div>
         </Card>
 
@@ -166,20 +178,22 @@ export default function HomePage() {
                   <span className="flex-1 text-foreground">{todo.title}</span>
                 )}
 
-                <button
-                  onClick={
-                    editingId === todo._id
-                      ? () => handleConfirmEdit(todo._id)
-                      : () => handleEditedInput(todo._id, todo.title)
-                  }
-                  className="shrink-0 text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
-                >
-                  {editingId === todo._id ? (
-                    <CheckCheck className="w-4 h-4" />
-                  ) : (
-                    <Pencil className="w-4 h-4" />
-                  )}
-                </button>
+                {
+                  <button
+                    onClick={
+                      editingId === todo._id
+                        ? () => handleConfirmEdit(todo._id)
+                        : () => handleEditedInput(todo._id, todo.title)
+                    }
+                    className="shrink-0 text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    {editingId === todo._id ? (
+                      <CheckCheck className="w-4 h-4" />
+                    ) : (
+                      <Pencil className="w-4 h-4" />
+                    )}
+                  </button>
+                }
                 <button
                   onClick={() => mutationDelete.mutate(todo._id)}
                   className="shrink-0 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"

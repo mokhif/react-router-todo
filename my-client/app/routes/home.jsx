@@ -7,48 +7,52 @@ import { useNavigate } from "react-router";
 import axios from "axios";
 import { Pencil, CheckCheck } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 export default function HomePage() {
   //Hooks
   const queryClient = useQueryClient();
   //Navigating
   const navigate = useNavigate();
   //States
-  const [editedInputId, setEditedInputId] = useState(null);
-  const [editedInput, setEditedInput] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
   const [input, setInput] = useState("");
-
+  //Setting editing state
   const handleEditedInput = (id, title) => {
-    (setEditedInputId(id), setEditedInput(title));
+    setEditingId(id);
+    setEditTitle(title);
   };
   //Deleting Todo
+
   const mutationDelete = useMutation({
     mutationFn: (id) =>
       axios
-        .delete(`http://localhost:5000/todos/${id}`, {
-          withCredentials: true,
-        })
+        .delete(`http://localhost:5000/todos/${id}`, { withCredentials: true })
         .then((res) => res.data),
     onSuccess: () => queryClient.invalidateQueries(["todos"]),
   });
-  //updating a todo
+  //Updating Todo
+
   const mutationUpdate = useMutation({
     mutationFn: (id) =>
       axios.put(
         `http://localhost:5000/todos/${id}`,
-        { title: editedInput },
+        { title: editTitle },
         { withCredentials: true },
       ),
     onSuccess: () => {
       queryClient.invalidateQueries(["todos"]);
-       setEditedInput("");
-    setEditedInputId(null);
+      setEditTitle("");
+      setEditingId(null);
     },
   });
+  //Confirming Edit
+
   const handleConfirmEdit = () => {
-    mutationUpdate.mutate(editedInputId);
-   
+    mutationUpdate.mutate(editingId);
   };
-  //Posting-Todo
+  //Adding Todo
+
   const mutation = useMutation({
     mutationFn: () =>
       axios
@@ -63,34 +67,29 @@ export default function HomePage() {
       setInput("");
     },
   });
-  //Getting(fetching)-User
-  const {
-    data: user,
-    isLoading: userLoading,
-    error: userError,
-  } = useQuery({
+  //Fetching User
+
+  const { data: user, error: userError } = useQuery({
     queryKey: ["user"],
     queryFn: () =>
       axios
         .get("http://localhost:5000/me", { withCredentials: true })
         .then((res) => res.data),
   });
-  //me if error go to login
+  //Redirect if not authenticated
   useEffect(() => {
     if (userError) navigate("/login");
   }, [userError]);
-  //Getting(fetching)-Todos
-  const {
-    data: todos,
-    isLoading: todoLoading,
-    error: todoError,
-  } = useQuery({
+  //Fetching Todos
+
+  const { data: todos } = useQuery({
     queryKey: ["todos"],
     queryFn: () =>
       axios
         .get("http://localhost:5000/todos", { withCredentials: true })
         .then((res) => res.data),
   });
+  //Logout
 
   const handlLogout = async () => {
     try {
@@ -157,10 +156,10 @@ export default function HomePage() {
                   <Check className="w-4 h-4 text-primary-foreground" />
                 </button>
 
-                {editedInputId === todo._id ? (
+                {editingId === todo._id ? (
                   <Input
-                    value={editedInput}
-                    onChange={(e) => setEditedInput(e.target.value)}
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
                     className="flex-1"
                   />
                 ) : (
@@ -169,13 +168,13 @@ export default function HomePage() {
 
                 <button
                   onClick={
-                    editedInputId === todo._id
+                    editingId === todo._id
                       ? () => handleConfirmEdit(todo._id)
                       : () => handleEditedInput(todo._id, todo.title)
                   }
                   className="shrink-0 text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
                 >
-                  {editedInputId === todo._id ? (
+                  {editingId === todo._id ? (
                     <CheckCheck className="w-4 h-4" />
                   ) : (
                     <Pencil className="w-4 h-4" />

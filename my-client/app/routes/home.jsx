@@ -20,7 +20,10 @@ export default function HomePage() {
           { withCredentials: true },
         )
         .then((res) => res.data),
-    onSuccess: () => queryClient.invalidateQueries(["todos"]),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["todos"]);
+      setInput("");
+    },
   });
   const {
     data: user,
@@ -93,7 +96,10 @@ export default function HomePage() {
               onChange={(e) => setInput(e.target.value)}
               className="flex-1 bg-background text-foreground border-border placeholder:text-muted-foreground/50"
             />
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6">
+            <Button
+              onClick={() => mutation.mutate()}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6"
+            >
               Add
             </Button>
           </div>

@@ -7,9 +7,23 @@ import { useNavigate } from "react-router";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 export default function HomePage() {
+  //Hooks
   const queryClient = useQueryClient();
+  //Navigating
   const navigate = useNavigate();
+  //States
   const [input, setInput] = useState("");
+  //Deleting Todo
+  const mutationDelete = useMutation({
+    mutationFn: (id) =>
+      axios
+        .delete(`http://localhost:5000/todos/${id}`, {
+          withCredentials: true,
+        })
+        .then((res) => res.data),
+    onSuccess: () => queryClient.invalidateQueries(["todos"]),
+  });
+
   //Posting-Todo
   const mutation = useMutation({
     mutationFn: () =>
@@ -25,6 +39,7 @@ export default function HomePage() {
       setInput("");
     },
   });
+  //Getting(fetching)-User
   const {
     data: user,
     isLoading: userLoading,
@@ -36,9 +51,11 @@ export default function HomePage() {
         .get("http://localhost:5000/me", { withCredentials: true })
         .then((res) => res.data),
   });
+  //me if error go to login
   useEffect(() => {
     if (userError) navigate("/login");
   }, [userError]);
+  //Getting(fetching)-Todos
   const {
     data: todos,
     isLoading: todoLoading,
@@ -116,7 +133,10 @@ export default function HomePage() {
                   <Check className="w-4 h-4 text-primary-foreground" />
                 </button>
                 <span className="flex-1 text-foreground">{todo.title}</span>
-                <button className="shrink-0 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100">
+                <button
+                  onClick={() => mutationDelete.mutate(todo._id)}
+                  className="shrink-0 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+                >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>

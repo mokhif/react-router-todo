@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Check, Trash2, LogOut } from "lucide-react";
 import { useNavigate } from "react-router";
 import axios from "axios";
+import { Pencil, CheckCheck } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 export default function HomePage() {
   //Hooks
@@ -12,7 +13,13 @@ export default function HomePage() {
   //Navigating
   const navigate = useNavigate();
   //States
+  const [editedInputId, setEditedInputId] = useState(null);
+  const [editedInput, setEditedInput] = useState("");
   const [input, setInput] = useState("");
+
+  const handleEditedInput = (id, title) => {
+    (setEditedInputId(id), setEditedInput(title));
+  };
   //Deleting Todo
   const mutationDelete = useMutation({
     mutationFn: (id) =>
@@ -23,7 +30,24 @@ export default function HomePage() {
         .then((res) => res.data),
     onSuccess: () => queryClient.invalidateQueries(["todos"]),
   });
-
+  //updating a todo
+  const mutationUpdate = useMutation({
+    mutationFn: (id) =>
+      axios.put(
+        `http://localhost:5000/todos/${id}`,
+        { title: editedInput },
+        { withCredentials: true },
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["todos"]);
+       setEditedInput("");
+    setEditedInputId(null);
+    },
+  });
+  const handleConfirmEdit = () => {
+    mutationUpdate.mutate(editedInputId);
+   
+  };
   //Posting-Todo
   const mutation = useMutation({
     mutationFn: () =>
@@ -132,7 +156,31 @@ export default function HomePage() {
                 <button className="shrink-0 w-6 h-6 rounded border-2 border-border hover:border-primary transition-all flex items-center justify-center">
                   <Check className="w-4 h-4 text-primary-foreground" />
                 </button>
-                <span className="flex-1 text-foreground">{todo.title}</span>
+
+                {editedInputId === todo._id ? (
+                  <Input
+                    value={editedInput}
+                    onChange={(e) => setEditedInput(e.target.value)}
+                    className="flex-1"
+                  />
+                ) : (
+                  <span className="flex-1 text-foreground">{todo.title}</span>
+                )}
+
+                <button
+                  onClick={
+                    editedInputId === todo._id
+                      ? () => handleConfirmEdit(todo._id)
+                      : () => handleEditedInput(todo._id, todo.title)
+                  }
+                  className="shrink-0 text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
+                >
+                  {editedInputId === todo._id ? (
+                    <CheckCheck className="w-4 h-4" />
+                  ) : (
+                    <Pencil className="w-4 h-4" />
+                  )}
+                </button>
                 <button
                   onClick={() => mutationDelete.mutate(todo._id)}
                   className="shrink-0 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"

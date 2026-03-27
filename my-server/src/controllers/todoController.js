@@ -1,6 +1,6 @@
+import Todo from "../models/todo.js";
 //Todo Crud Section
 //Creating a Todo
-import Todo from "../models/todo.js";
 export const createTodo = async (req, res) => {
   try {
     const todo = await Todo.create({

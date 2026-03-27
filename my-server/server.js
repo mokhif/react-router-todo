@@ -1,18 +1,10 @@
 import dotenv from "dotenv";
 dotenv.config();
-import generateToken from "./src/utils/generateToken.js";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import User from "./src/models/user.js";
 import protect from "./src/middleware/auth.js";
 import { connectDB } from "./config/db.js";
-import {
-  createTodo,
-  getTodos,
-  deleteTodo,
-  updateTodo,
-} from "./src/controllers/todoController.js";
 import { register, login } from "./src/controllers/authController.js";
 import todoRouter from "./src/routes/todoRoutes.js";
 
@@ -35,11 +27,11 @@ app.use(
 app.post("/register", register);
 //Login
 app.post("/login", login);
-
+//protected route 
 app.get("/me", protect, (req, res) => {
   res.status(200).json(req.user);
 });
-
+//protected route
 app.get("/home", protect, (req, res) => {
   res.status(200).json({ msg: "Welcome", user: req.user });
 });

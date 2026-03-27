@@ -13,7 +13,9 @@ import {
   deleteTodo,
   updateTodo,
 } from "./src/controllers/todoController.js";
-import Todo from "./src/models/todo.js";
+import { register, login } from "./src/controllers/authController.js";
+import todoRouter from "./src/routes/todoRoutes.js";
+
 const app = express();
 const port = 5000;
 app.use(cookieParser());
@@ -30,32 +32,9 @@ app.use(
   }),
 );
 //REgistration Route
-app.post("/register", async (req, res) => {
-  const { name, email, password } = req.body;
-  try {
-    const userExists = await User.findOne({ email });
-    if (userExists) return res.status(400).json({ msg: "User already exists" });
-    const user = await User.create({ name, email, password });
-    generateToken(res, user._id);
-    res.status(200).json({ msg: "Registered successfully" });
-  } catch (error) {
-    res.status(400).json({ msg: `error registering ${error.message}` });
-  }
-});
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ msg: "User does not exist" });
-    const passwordMatch = await user.comparePassword(password);
-    if (!passwordMatch)
-      return res.status(400).json({ msg: "Password does not match" });
-    generateToken(res, user._id);
-    res.status(200).json({ msg: "Login successful" });
-  } catch (error) {
-    res.status(400).json({ msg: `error ${error.message}` });
-  }
-});
+app.post("/register", register);
+//Login
+app.post("/login", login);
 
 app.get("/me", protect, (req, res) => {
   res.status(200).json(req.user);
@@ -70,13 +49,7 @@ app.post("/logout", (req, res) => {
 });
 
 //Todo Crud Section
-//Creating a Todo
-app.post("/todos", protect, createTodo);
-//requesting all todos
-app.get("/todos", protect, getTodos);
-//deleting a todo
-app.delete("/todos/:id", protect, deleteTodo);
-//update a todo
-app.put("/todos/:id", protect, updateTodo);
+app.use("/todos", todoRouter);
+// starting the server and connectinmg to the database
 connectDB().catch((error) => console.log(error));
 app.listen(port, () => console.log(`server is running on port:${port}`));

@@ -12,8 +12,8 @@ export const createTodo = async (req, res) => {
     res.status(400).json({ msg: `error ${error.message}` });
   }
 };
-//requesting all todos
 
+//requesting all todos
 export const getTodos = async (req, res) => {
   try {
     const todos = await Todo.find({ user: req.user._id });
@@ -23,7 +23,6 @@ export const getTodos = async (req, res) => {
   }
 };
 //deleting a todo
-
 export const deleteTodo = async (req, res) => {
   try {
     const deletedTodo = await Todo.findByIdAndDelete(req.params.id);
@@ -34,7 +33,6 @@ export const deleteTodo = async (req, res) => {
   }
 };
 //update a todo
-
 export const updateTodo = async (req, res) => {
   try {
     const updateTodo = await Todo.findByIdAndUpdate(req.params.id, req.body, {

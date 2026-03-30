@@ -1,48 +1,14 @@
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Check, Trash2, LogOut } from "lucide-react";
 import { useNavigate } from "react-router";
 import axios from "axios";
-import { Pencil, CheckCheck } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import LoadingButton from "@/components/LoadingButton";
+import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import AddTodoInput from "@/components/AddTodoInput";
 import TaksRender from "@/components/TaksRender";
 export default function HomePage() {
   //Hooks
-  const queryClient = useQueryClient();
   //Navigating
   const navigate = useNavigate();
-  //States
-  const [editTitle, setEditTitle] = useState("");
-  //Setting editing state
-  const handleEditedInput = (id, title) => {
-    setEditingId(id);
-    setEditTitle(title);
-  };
-
-  //Updating Todo
-
-  const mutationUpdate = useMutation({
-    mutationFn: (id) =>
-      axios.put(
-        `http://localhost:5000/todos/${id}`,
-        { title: editTitle },
-        { withCredentials: true },
-      ),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["todos"]);
-      setEditTitle("");
-      setEditingId(null);
-    },
-  });
-  //Confirming Edit
-
-  const handleConfirmEdit = () => {
-    mutationUpdate.mutate(editingId);
-  };
 
   //Fetching User
 
@@ -78,7 +44,6 @@ export default function HomePage() {
       <Header handlLogout={handlLogout} user={user} />
       <main className="max-w-3xl mx-auto px-4 py-8">
         <AddTodoInput />
-
         <TaksRender />
       </main>
     </div>

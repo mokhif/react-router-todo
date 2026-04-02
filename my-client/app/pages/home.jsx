@@ -5,11 +5,15 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import AddTodoInput from "@/components/AddTodoInput";
 import TaksRender from "@/components/TaksRender";
+
+import Groops from "@/components/Groops";
+
 export default function HomePage() {
   //Hooks
   //Navigating
   const navigate = useNavigate();
-
+  //state
+  const [selectedGroup, setSelectedGroup] = useState("all");
   //Fetching User
 
   const { data: user, error: userError } = useQuery({
@@ -38,12 +42,18 @@ export default function HomePage() {
       console.error(error.response.data);
     }
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/5">
       <Header handlLogout={handlLogout} user={user} />
       <main className="max-w-3xl mx-auto px-4 py-8">
         <AddTodoInput />
+        <div>
+          <label className="text-sm text-muted-foreground mb-2 block">
+            Group
+          </label>
+          <Groops />
+        </div>
+
         <TaksRender />
       </main>
     </div>

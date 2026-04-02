@@ -1,5 +1,5 @@
-import User from "../models/user.js";
-
+import User from "../models/User.js";
+import generateToken from "../utils/generateToken.js";
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
   try {
@@ -18,12 +18,12 @@ export const login = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ msg: "user does not exists" });
-    const passwordMatch = await User.comparePassword(password);
+    const passwordMatch = await user.comparePassword(password);
     if (!passwordMatch)
       return res.status(400).json({ msg: "password does not match" });
     generateToken(res, user._id);
     res.status(200).json({ msg: "login successfully" });
   } catch (error) {
-    res.status(400).json({ msg: `error ${error.message}` });
+    res.status(400).json({ msg: `error in 'loggin in' ${error.message}` });
   }
 };

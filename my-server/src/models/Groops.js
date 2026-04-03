@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 const groopsSchema = new Schema(
   {
-    name: {
+    title: {
       type: String,
       required: true,
     },

@@ -1,12 +1,16 @@
 import mongoose, { Schema } from "mongoose";
 
-const groopsSchema = new Schema(
+const groupSchema = new Schema(
   {
     title: {
       type: String,
       required: true,
     },
-
+    description: {
+      type: String,
+      required: false,
+      default: "",
+    },
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -17,4 +21,4 @@ const groopsSchema = new Schema(
   },
 );
 
-export default mongoose.model("Groops", groopsSchema);
+export default mongoose.model("Group", groupSchema);

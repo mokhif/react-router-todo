@@ -9,9 +9,9 @@ const todoSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    groops: {
+    group: {
       type: Schema.Types.ObjectId,
-      ref: "Groops",
+      ref: "Group",
     },
     user: {
       type: Schema.Types.ObjectId,

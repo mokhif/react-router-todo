@@ -1,60 +1,33 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import Navbar from "@/components/Navbar";
+import { TodoBoard } from "@/components/TodoBoard";
 import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
-import Header from "@/components/Header";
-import AddTodoInput from "@/components/AddTodoInput";
-import TaksRender from "@/components/TaksRender";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
+export default function Home() {
+  //states
 
-import Groops from "@/components/Groops";
-
-export default function HomePage() {
-  //Hooks
-  //Navigating
-  const navigate = useNavigate();
-  //state
-  const [selectedGroup, setSelectedGroup] = useState("all");
-  //Fetching User
-
-  const { data: user, error: userError } = useQuery({
-    queryKey: ["user"],
+  //hooks
+  const queryClient = useQueryClient();
+  //fetching group
+  const {
+    data: group,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["group"],
     queryFn: () =>
       axios
-        .get("http://localhost:5000/me", { withCredentials: true })
+        .get("http://localhost:5000/group", { withCredentials: true })
         .then((res) => res.data),
   });
-  //Redirect if not authenticated
-  useEffect(() => {
-    if (userError) navigate("/login");
-  }, [userError]);
 
-  //Logout
-
-  const handlLogout = async () => {
-    try {
-      await axios.post(
-        "http://localhost:5000/logout",
-        {},
-        { withCredentials: true },
-      );
-      navigate("/login");
-    } catch (error) {
-      console.error(error.response.data);
-    }
-  };
+  if (error) return <div>{error.message}</div>;
+  if (isLoading) return <div>Loading...</div>;
+  console.log("My Group Data:", group);
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/5">
-      <Header handlLogout={handlLogout} user={user} />
-      <main className="max-w-3xl mx-auto px-4 py-8">
-        <AddTodoInput />
-        <div>
-          <label className="text-sm text-muted-foreground mb-2 block">
-            Group
-          </label>
-          <Groops />
-        </div>
-
-        <TaksRender />
+    <div className="flex h-screen flex-col overflow-hidden bg-background">
+      <Navbar />
+      <main className="flex-1 overflow-hidden p-6">
+        <TodoBoard group={group} />
       </main>
     </div>
   );

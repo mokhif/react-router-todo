@@ -7,7 +7,7 @@ import protect from "./src/middleware/auth.js";
 import { connectDB } from "./config/db.js";
 import { register, login } from "./src/controllers/authController.js";
 import todoRouter from "./src/routes/todoRoutes.js";
-import groopRouter from "./src/routes/groopsRoutes.js";
+import groupRouter from "./src/routes/groupRoutes.js";
 const app = express();
 const port = 5000;
 app.use(cookieParser());
@@ -42,8 +42,8 @@ app.post("/logout", (req, res) => {
 
 //Todo Crud Section
 app.use("/todos", todoRouter);
-//groop crud section
-app.use("/groops", groopRouter);
+//group crud section
+app.use("/group", groupRouter);
 // starting the server and connectinmg to the database
 connectDB().catch((error) => console.log(error));
 app.listen(port, () => console.log(`server is running on port:${port}`));

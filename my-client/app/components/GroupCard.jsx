@@ -2,15 +2,20 @@ import { Button } from "@/components/ui/button";
 import TodoItem from "./TodoItem";
 import { Check, Pencil, Plus, Trash2 } from "lucide-react";
 import axios from "axios";
-import { useState } from "react";
+import { use, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import AddTodoModal from "./AddTodoModal";
+import { Dialog, DialogTrigger } from "./ui/dialog";
 const GroupCard = ({ title, id }) => {
   //States
+  //group states
   const [newTitle, setNewTitle] = useState(title);
   const [isEditing, setIsEditing] = useState(null);
+  //Todo states
+  const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   //deleting group
-  const mutationDelete = useMutation({
+  const mutationDeleteGroup = useMutation({
     mutationFn: (id) =>
       axios
         .delete(`http://localhost:5000/group/${id}`, { withCredentials: true })
@@ -18,7 +23,7 @@ const GroupCard = ({ title, id }) => {
     onSuccess: () => queryClient.invalidateQueries(["group"]),
   });
   //updating group
-  const mutationUpdate = useMutation({
+  const mutationUpdateGroup = useMutation({
     mutationFn: (id) =>
       axios
         .put(
@@ -32,6 +37,7 @@ const GroupCard = ({ title, id }) => {
       setIsEditing(null);
     },
   });
+  console.log(id);
   return (
     <div className="flex w-80 flex-shrink-0 flex-col rounded-lg border border-border bg-card shadow-sm">
       <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
@@ -54,7 +60,7 @@ const GroupCard = ({ title, id }) => {
           <Button
             onClick={
               isEditing
-                ? () => mutationUpdate.mutate(id)
+                ? () => mutationUpdateGroup.mutate(id)
                 : () => setIsEditing(!isEditing)
             }
             size="sm"
@@ -67,16 +73,21 @@ const GroupCard = ({ title, id }) => {
               <Pencil className="h- w-2" />
             )}
           </Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button
+                onClick={() => setOpen(true)}
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 text-primary hover:bg-primary/10"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <AddTodoModal id={id} setOpen={setOpen} open={open} />
+          </Dialog>
           <Button
-            size="sm"
-            variant="ghost"
-            className="h-8 w-8 p-0 text-primary hover:bg-primary/10"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-
-          <Button
-            onClick={() => mutationDelete.mutate(id)}
+            onClick={() => mutationDeleteGroup.mutate(id)}
             size="sm"
             variant="ghost"
             className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"

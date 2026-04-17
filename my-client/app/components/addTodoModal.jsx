@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import {
   Dialog,
@@ -9,15 +7,32 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
-
-const AddTodoModal = ({ isOpen, onClose, onSubmit }) => {
-  const [todoText, setTodoText] = useState("");
-
+const AddTodoModal = ({ open, setOpen, id }) => {
+  const queryClient = useQueryClient();
+  const [todoTitle, setTodoTitle] = useState("");
+  //adding Todo
+  console.log(id);
+  const mutatioAddTodo = useMutation({
+    mutationFn: () =>
+      axios
+        .post(
+          "http://localhost:5000/todos",
+          { title: todoTitle, group: id },
+          { withCredentials: true },
+        )
+        .then((res) => res.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["todos", id]);
+      setTodoTitle("");
+      setOpen(false);
+    },
+  });
   const handleSubmit = () => {
-    if (todoText.trim()) {
-      onSubmit(todoText.trim());
-      setTodoText("");
+    if (todoTitle.trim()) {
+      mutatioAddTodo.mutate();
     }
   };
 
@@ -25,12 +40,12 @@ const AddTodoModal = ({ isOpen, onClose, onSubmit }) => {
     if (e.key === "Enter") {
       handleSubmit();
     } else if (e.key === "Escape") {
-      onClose();
+      setOpen(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add a New Todo</DialogTitle>
@@ -42,8 +57,8 @@ const AddTodoModal = ({ isOpen, onClose, onSubmit }) => {
         <div className="grid gap-4 py-4">
           <input
             type="text"
-            value={todoText}
-            onChange={(e) => setTodoText(e.target.value)}
+            value={todoTitle}
+            onChange={(e) => setTodoTitle(e.target.value)}
             onKeyDown={handleKeyDown}
             autoFocus
             className="rounded border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-primary focus:ring-1 focus:ring-ring"
@@ -52,11 +67,14 @@ const AddTodoModal = ({ isOpen, onClose, onSubmit }) => {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={!todoText.trim()}>
-            Save Todo
+          <Button
+            onClick={handleSubmit}
+            disabled={!todoTitle.trim() || mutatioAddTodo.isPending}
+          >
+            {mutatioAddTodo.isPending ? "Saving..." : "Save Todo"}
           </Button>
         </DialogFooter>
       </DialogContent>

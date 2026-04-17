@@ -1,0 +1,20 @@
+{
+  "artificialDelayMilliseconds": 800,
+  "keepExistingTerminalsOpen": false,
+  "runOnStartup": true,
+  "terminals": [
+    {
+      "splitTerminals": [
+        {
+          "name": "backend",
+          "commands": ["cd my-server", "npm run dev"]
+        },
+        {
+          "name": "frontend",
+          "commands": ["cd my-client", "npm run dev"]
+        }
+      ]
+    }
+  ]
+}
+fgsdaffsadfsadfsdafasgertlkadfvjodashfjfvasdgfag

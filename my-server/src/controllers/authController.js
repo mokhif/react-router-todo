@@ -27,3 +27,14 @@ export const login = async (req, res) => {
     res.status(400).json({ msg: `error in 'loggin in' ${error.message}` });
   }
 };
+export const logout = async (req, res) => {
+  // To kill the cookie, all options MUST match the Birth settings above
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    path: "/",
+  });
+
+  return res.status(200).json({ msg: "Logged out successfully" });
+};

@@ -2,20 +2,14 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
 import { Link } from "react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import axios from "axios";
 import { useState } from "react";
-const schema = z.object({
-  email: z.string().regex(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/, {
-    message: "Please enter a valid email address.",
-  }),
-  password: z.string().min(6, "At least 6 characters"),
-});
+import { loginSchema } from "../lib/schemas/authSchema";
+
 export default function Login() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -23,7 +17,7 @@ export default function Login() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({ resolver: zodResolver(schema) });
+  } = useForm({ resolver: zodResolver(loginSchema) });
 
   const onSubmit = async (data) => {
     try {

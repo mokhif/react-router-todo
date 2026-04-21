@@ -5,6 +5,7 @@ import { useState } from "react";
 const TodoItem = ({ todo }) => {
   const [isEditing, setIsEditing] = useState(false);
   // const [todoTitle, setTodoTitle] = useState(todo.title);
+
   return (
     <Card className="p-4 border-border bg-card hover:bg-secondary/20 transition-colors group">
       <div className="flex items-center gap-3">

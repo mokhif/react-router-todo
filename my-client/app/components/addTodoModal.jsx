@@ -6,15 +6,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-const AddTodoModal = ({ open, setOpen, id }) => {
+import { Plus } from "lucide-react";
+const AddTodoModal = ({ id }) => {
   const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
   const [todoTitle, setTodoTitle] = useState("");
   //adding Todo
-  console.log(id);
   const mutatioAddTodo = useMutation({
     mutationFn: () =>
       axios
@@ -46,6 +48,16 @@ const AddTodoModal = ({ open, setOpen, id }) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          onClick={() => setOpen(true)}
+          size="sm"
+          variant="ghost"
+          className="h-8 w-8 p-0 text-primary hover:bg-primary/10"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add a New Todo</DialogTitle>
@@ -82,3 +94,16 @@ const AddTodoModal = ({ open, setOpen, id }) => {
   );
 };
 export default AddTodoModal;
+
+// <Dialog open={open} onOpenChange={setOpen}>
+//   <DialogTrigger asChild>
+//     <Button
+//       onClick={() => setOpen(true)}
+//       size="sm"
+//       variant="ghost"
+//       className="h-8 w-8 p-0 text-primary hover:bg-primary/10"
+//     >
+//       <Plus className="h-4 w-4" />
+//     </Button>
+//   </DialogTrigger>
+// </Dialog>

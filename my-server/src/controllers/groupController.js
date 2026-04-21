@@ -11,7 +11,7 @@ export const createGroup = async (req, res) => {
   }
 };
 //requesting all group
-export const getGroup = async (req, res) => {
+export const getUserGroups = async (req, res) => {
   try {
     const group = await Group.find({ user: req.user._id });
     res.status(200).json(group);
@@ -20,7 +20,7 @@ export const getGroup = async (req, res) => {
   }
 };
 //deleting a group
-export const deleteGroup = async (req, res) => {
+export const deleteGroupById = async (req, res) => {
   try {
     const deletedGroup = await Group.findByIdAndDelete(req.params.id);
     if (!deletedGroup) return res.status(404).json({ msg: "Group not found" });

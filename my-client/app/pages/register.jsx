@@ -9,20 +9,7 @@ import { z } from "zod";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import axios from "axios";
 import { useNavigate } from "react-router";
-
-const schema = z
-  .object({
-    name: z.string(),
-    email: z.string().regex(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/, {
-      message: "Please enter a valid email address.",
-    }),
-    password: z.string().min(6, "At least 6 characters"),
-    confirmPassword: z.string().min(6),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Password don't match",
-    path: ["confirmPassword"],
-  });
+import { loginSchema } from "../lib/schemas/authSchema";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -31,7 +18,7 @@ export default function Register() {
     handleSubmit,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(registerSchema),
   });
 
   const onSubmit = async (data) => {

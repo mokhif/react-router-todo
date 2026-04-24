@@ -1,0 +1,33 @@
+import mongoose, { Schema } from "mongoose";
+const todoSchema = new Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+    },
+    isDone: {
+      type: Boolean,
+      default: false,
+    },
+    group: {
+      type: Schema.Types.ObjectId,
+      ref: "Group",
+    },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    subtasks: [
+      {
+        title: { type: String },
+        isDone: { type: Boolean, default: false },
+      },
+    ],
+    dueDate: { type: Date, default: Date.now },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+export default mongoose.model("Todo", todoSchema);

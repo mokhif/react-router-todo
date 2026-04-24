@@ -4,5 +4,5 @@ import { index, route } from "@react-router/dev/routes";
 export default [
   route("login", "./pages/login.jsx"),
   route("register", "./pages/register.jsx"),
-  route("home", "./pages/home.jsx"),
+  route("/", "./pages/home.jsx"),
 ];

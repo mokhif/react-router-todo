@@ -28,7 +28,7 @@ const CreateGroup = () => {
         )
         .then((res) => res.data),
     onSuccess: () => {
-      queryClient.invalidateQueries(["group"]);
+      queryClient.invalidateQueries(["groups"]);
       setOpen(false);
       setGroup("");
     },

@@ -12,10 +12,21 @@ export const createTodo = async (req, res) => {
     res.status(400).json({ msg: `error ${error.message}` });
   }
 };
+//requesting group todo
+export const getGroupTodo = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const userId = req.user._id;
+    const todos = await Todo.find({ group: groupId, user: userId });
+    res.status(200).json(todos);
+  } catch (error) {
+    res.status(400).json({ msg: `error ${error.message}` });
+  }
+};
 //requesting all todos
 export const getTodos = async (req, res) => {
   try {
-    const todos = await Todo.find({ user: req.user._id });
+    const todos = await Todo.find({ group: groupId, user: req.user._id });
     res.status(200).json(todos);
   } catch (error) {
     res.status(400).json({ msg: `error ${error.message}` });

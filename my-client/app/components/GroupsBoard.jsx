@@ -1,7 +1,7 @@
 "use client";
 import GroupCard from "./Groupcard";
 
-const TodoBoard = ({ groups }) => {
+const GroupsBoard = ({ groups }) => {
   if (groups?.length === 0) {
     return (
       <div className="flex min-h-96 items-center justify-center">
@@ -19,4 +19,4 @@ const TodoBoard = ({ groups }) => {
     </div>
   );
 };
-export { TodoBoard };
+export { GroupsBoard };

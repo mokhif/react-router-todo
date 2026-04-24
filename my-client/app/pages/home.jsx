@@ -1,5 +1,5 @@
 import Navbar from "@/components/Navbar";
-import { TodoBoard } from "@/components/TodoBoard";
+import { GroupsBoard } from "@/components/GroupsBoard";
 import axios from "axios";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
@@ -35,7 +35,7 @@ export default function Home() {
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <Navbar handleLogout={handleLogout} />
       <main className="flex-1 overflow-hidden p-6">
-        <TodoBoard groups={groups} />
+        <GroupsBoard groups={groups} />
       </main>
     </div>
   );

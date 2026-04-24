@@ -31,7 +31,7 @@ app.get("/me", protect, (req, res) => {
   res.status(200).json(req.user);
 });
 //protected route
-app.get("/home", protect, (req, res) => {
+app.get("/", protect, (req, res) => {
   res.status(200).json({ msg: "Welcome", user: req.user });
 });
 //removing cookie

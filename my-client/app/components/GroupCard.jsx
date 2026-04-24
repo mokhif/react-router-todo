@@ -3,11 +3,13 @@ import TodoItem from "./TodoItem";
 import { Check, Pencil, Plus, Trash2 } from "lucide-react";
 import axios from "axios";
 import { use, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import AddTodoModal from "./AddTodoModal";
 const GroupCard = ({ group }) => {
+  //hooks
   const { _id, title } = group;
   //States
+
   //group states
   const [newTitle, setNewTitle] = useState(title);
   const [isEditing, setIsEditing] = useState(null);
@@ -19,7 +21,7 @@ const GroupCard = ({ group }) => {
       axios
         .delete(`http://localhost:5000/group/${_id}`, { withCredentials: true })
         .then((res) => res.data),
-    onSuccess: () => queryClient.invalidateQueries(["group"]),
+    onSuccess: () => queryClient.invalidateQueries(["groups"]),
   });
   //updating group
   const mutationUpdateGroup = useMutation({
@@ -32,12 +34,20 @@ const GroupCard = ({ group }) => {
         )
         .then((res) => res.data),
     onSuccess: () => {
-      queryClient.invalidateQueries(["group"]);
+      queryClient.invalidateQueries(["groups"]);
       setIsEditing(null);
     },
   });
   const handleEditing = () => setIsEditing(!isEditing);
   const handleUpdate = () => mutationUpdateGroup.mutate(_id);
+  //fetching TodosForSpecificGroup
+  const { data: todos } = useQuery({
+    queryKey: ["todos", _id],
+    queryFn: () =>
+      axios
+        .get(`http://localhost:5000/todos/${_id}`, { withCredentials: true })
+        .then((res) => res.data),
+  });
   return (
     <div className="flex w-80 flex-shrink-0 flex-col rounded-lg border border-border bg-card shadow-sm">
       <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
@@ -66,10 +76,10 @@ const GroupCard = ({ group }) => {
             {isEditing ? (
               <Check className="h-4 w-4" />
             ) : (
-              <Pencil className="h- w-2" />
+              <Pencil className="h-4 w-4" />
             )}
           </Button>
-          <AddTodoModal _id={_id} />
+          <AddTodoModal id={_id} />
           <Button
             onClick={() => mutationDeleteGroup.mutate(_id)}
             size="sm"
@@ -82,7 +92,9 @@ const GroupCard = ({ group }) => {
       </div>
 
       <div className="max-h-96 flex-1 space-y-2 overflow-y-auto p-4">
-        <TodoItem />
+        {todos?.map((todo) => (
+          <TodoItem key={todo._id} todo={todo} group={group} />
+        ))}
       </div>
     </div>
   );

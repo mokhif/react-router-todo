@@ -24,7 +24,7 @@ export default function Login() {
       await axios.post("http://localhost:5000/login", data, {
         withCredentials: true,
       });
-      navigate("/home");
+      navigate("/");
     } catch (error) {
       console.error(error.response.data);
       setError(error.response.data.msg);

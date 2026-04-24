@@ -26,7 +26,7 @@ export default function Register() {
       await axios.post("http://localhost:5000/register", data, {
         withCredentials: true,
       });
-      navigate("/home");
+      navigate("/");
     } catch (error) {
       console.error(error.response.data);
     }

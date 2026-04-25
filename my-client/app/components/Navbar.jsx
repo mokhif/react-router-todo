@@ -1,5 +1,4 @@
 import React from "react";
-import { useState } from "react";
 import { Button } from "./ui/button";
 import { LogOut } from "lucide-react";
 

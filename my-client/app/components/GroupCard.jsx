@@ -64,6 +64,7 @@ const GroupCard = ({ group }) => {
         .get(`http://localhost:5000/todos/${_id}`, { withCredentials: true })
         .then((res) => res.data),
   });
+  console.log(todos)
   return (
     <div className="flex w-80 flex-shrink-0 flex-col rounded-lg border border-border bg-card shadow-sm">
       {/* HEADER SECTION */}
@@ -154,7 +155,6 @@ const GroupCard = ({ group }) => {
         </div>
       </div>
 
-      {/* TODO LIST SECTION */}
       <div className="flex-1 space-y-2 overflow-y-auto p-4">
         {todos?.map((todo) => (
           <TodoItem key={todo._id} todo={todo} group={group} />

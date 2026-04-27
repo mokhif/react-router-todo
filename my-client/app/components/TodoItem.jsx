@@ -1,5 +1,8 @@
-import React from "react";
-import { Card } from "./ui/card";
+import React, { useState } from "react";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import axios from "axios";
 import {
   Check,
   CheckCheck,
@@ -10,33 +13,25 @@ import {
   ChevronsUp,
   ChevronDown,
   ChevronsDown,
+  X,
 } from "lucide-react";
-import { useState } from "react";
-import { Input } from "./ui/input";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
-import axios from "axios";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuGroup,
-  DropdownMenuPortal,
-  DropdownMenuSub,
+  DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Button } from "./ui/button";
 
 const TodoItem = ({ todo, group }) => {
   const { _id } = todo;
-  //hooks
   const queryClient = useQueryClient();
-  //states
+
   const [isEditing, setIsEditing] = useState(false);
   const [todoTitle, setTodoTitle] = useState(todo.title);
-  //deleting Single Todo
+
+  // 1. Delete Mutation
   const mutationDeleteTodo = useMutation({
     mutationFn: (_id) =>
       axios
@@ -46,45 +41,30 @@ const TodoItem = ({ todo, group }) => {
         .then((res) => res.data),
     onSuccess: () => queryClient.invalidateQueries(["todos", group._id]),
   });
-  //updating a todo
+
+  // 2. Update Title Mutation
   const mutationUpdateTodo = useMutation({
     mutationFn: (_id) =>
       axios
         .put(
           `http://localhost:5000/todos/${_id}`,
-          {
-            title: todoTitle,
-          },
+          { title: todoTitle },
           { withCredentials: true },
         )
         .then((res) => res.data),
     onSuccess: () => {
       queryClient.invalidateQueries(["todos", group._id]);
-      setIsEditing(false);
+      setIsEditing(false); // Only close input on success
     },
   });
-  //editingtodo func
-  const handleEditing = () => setIsEditing(!isEditing);
-  const handleConfirmEditing = () => {
-    mutationUpdateTodo.mutate(_id);
-    setIsEditing(false);
-  };
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      handleConfirmEditing();
-    } else if (e.key === "Escape") {
-      handleEditing();
-    }
-  };
-  //isDone Mutation
+
+  // 3. Toggle Done Mutation
   const mutationToggleDone = useMutation({
     mutationFn: (_id) =>
       axios
         .put(
           `http://localhost:5000/todos/${_id}`,
-          {
-            isDone: !todo.isDone,
-          },
+          { isDone: !todo.isDone },
           { withCredentials: true },
         )
         .then((res) => res.data),
@@ -92,114 +72,146 @@ const TodoItem = ({ todo, group }) => {
       queryClient.invalidateQueries(["todos", group._id]);
     },
   });
-  const handleDoneToggle = () => {
-    mutationToggleDone.mutate(_id);
+
+  // Handlers
+  const handleEditing = () => setIsEditing(true);
+
+  const handleConfirmEditing = () => {
+    if (todoTitle.trim()) mutationUpdateTodo.mutate(_id);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleConfirmEditing();
+    else if (e.key === "Escape") {
+      setTodoTitle(todo.title); // Reset to original if canceled
+      setIsEditing(false);
+    }
+  };
+  //move up and down
+  const moveUp = () => {
+    const currentTodos = queryClient.getQueryData(["todos", group._id]);
+
+    const i = currentTodos.findIndex((item) => item._id === _id);
+    if (i <= 0) return;
+    const newArray = [...currentTodos];
+    [newArray[i - 1], newArray[i]] = [newArray[i], newArray[i - 1]];
+    queryClient.setQueryData(["todos", group._id], newArray);
+  };
+  const moveDown = () => {
+    const currentTodos = queryClient.getQueryData(["todos", group._id]);
+    const i = currentTodos.findIndex((item) => item._id === _id);
+    if (i < 0 || i >= currentTodos.length - 1) return;
+    const newArray = [...currentTodos];
+    [newArray[i], newArray[i + 1]] = [newArray[i + 1], newArray[i]];
+    queryClient.setQueryData(["todos", group._id], newArray);
   };
   return (
-    <Card className="p-4 border-border bg-card hover:bg-secondary/20 transition-colors group">
-      <div className="flex items-center gap-3">
-        {/* 1. Toggle Checkbox Circle */}
-        <button
-          onClick={handleDoneToggle}
-          className={`shrink-0 w-6 h-6 rounded border-2 transition-all flex items-center justify-center 
-          ${
-            todo.isDone
-              ? "bg-primary border-primary"
-              : "border-border hover:border-primary"
-          }`}
-        >
-          {todo.isDone && <Check className="w-4 h-4 text-primary-foreground" />}
-        </button>
-
-        {/* 2. Text or Input Field */}
-        {isEditing ? (
-          <Input
-            value={todoTitle}
-            onChange={(e) => setTodoTitle(e.target.value)}
-            onKeyDown={handleKeyDown}
-            autoFocus
-            className="flex-1"
-          />
-        ) : (
-          <span
-            className={`flex-1 text-foreground ${todo.isDone ? "line-through text-muted-foreground" : ""}`}
-          >
-            {todo.title}
-          </span>
+    <div className="group flex items-center gap-3 rounded-md border border-border bg-card px-3 py-2.5 shadow-sm transition-colors hover:bg-accent/50">
+      {/* Checkbox */}
+      <button
+        onClick={() => mutationToggleDone.mutate(_id)}
+        disabled={mutationToggleDone.isPending}
+        className={`shrink-0 w-5 h-5 rounded border transition-all flex items-center justify-center ${
+          todo.isDone
+            ? "bg-primary border-primary"
+            : "border-input hover:border-primary"
+        }`}
+      >
+        {todo.isDone && (
+          <Check className="w-3.5 h-3.5 text-primary-foreground" />
         )}
+      </button>
 
-        {/* 3. Action Area (Conditional) */}
-        <div className="flex items-center gap-1">
-          {isEditing ? (
-            /* SHOW THESE WHEN EDITING */
-            <div className="flex items-center gap-1">
+      {/* Title / Input */}
+      {isEditing ? (
+        <Input
+          value={todoTitle}
+          onChange={(e) => setTodoTitle(e.target.value)}
+          onKeyDown={handleKeyDown}
+          autoFocus
+          className="h-7 text-sm flex-1 px-2"
+        />
+      ) : (
+        <span
+          className={`flex-1 text-sm truncate ${todo.isDone ? "line-through text-muted-foreground" : "text-foreground"}`}
+        >
+          {todo.title}
+        </span>
+      )}
+
+      {/* Action Area */}
+      <div className="flex items-center gap-1 shrink-0">
+        {isEditing ? (
+          <div className="flex items-center gap-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleConfirmEditing}
+              disabled={mutationUpdateTodo.isPending}
+              className="h-7 w-7 p-0 text-green-600 hover:bg-green-50"
+            >
+              <CheckCheck className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setTodoTitle(todo.title);
+                setIsEditing(false);
+              }}
+              className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
-                size="sm"
                 variant="ghost"
-                onClick={handleConfirmEditing}
-                className="h-8 w-8 p-0 text-green-600 hover:bg-green-50"
-              >
-                <CheckCheck className="h-4 w-4" />
-              </Button>
-              <Button
                 size="sm"
-                variant="ghost"
-                onClick={() => setIsEditing(false)}
-                className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"
+                className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
               >
-                <Trash2 className="h-4 w-4" />{" "}
-                {/* Acting as "Cancel" icon here */}
+                <MoreVertical className="h-4 w-4 text-muted-foreground" />
               </Button>
-            </div>
-          ) : (
-            /* SHOW DROPDOWN WHEN NOT EDITING */
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <MoreVertical className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </DropdownMenuTrigger>
+            </DropdownMenuTrigger>
 
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={handleEditing}>
-                  <Pencil className="mr-2 h-4 w-4" /> Edit Task
-                </DropdownMenuItem>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem onClick={handleEditing}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit Task
+              </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Reorder</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Reorder</DropdownMenuLabel>
 
-                <DropdownMenuItem onClick={() => console.log("Top")}>
-                  <ChevronsUp className="mr-2 h-4 w-4" /> Move to Top
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => console.log("Up")}>
-                  <ChevronUp className="mr-2 h-4 w-4" /> Move Up
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => console.log("Down")}>
-                  <ChevronDown className="mr-2 h-4 w-4" /> Move Down
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => console.log("Bottom")}>
-                  <ChevronsDown className="mr-2 h-4 w-4" /> Move to Bottom
-                </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => console.log("Top")}>
+                <ChevronsUp className="mr-2 h-4 w-4" /> Move to Top
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={moveUp}>
+                <ChevronUp className="mr-2 h-4 w-4" /> Move Up
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={moveDown}>
+                <ChevronDown className="mr-2 h-4 w-4" /> Move Down
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => console.log("Bottom")}>
+                <ChevronsDown className="mr-2 h-4 w-4" /> Move to Bottom
+              </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
+              <DropdownMenuSeparator />
 
-                <DropdownMenuItem
-                  onClick={() => mutationDeleteTodo.mutate(_id)}
-                  className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete Task
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
+              <DropdownMenuItem
+                onClick={() => mutationDeleteTodo.mutate(_id)}
+                disabled={mutationDeleteTodo.isPending}
+                className="text-destructive focus:text-destructive focus:bg-destructive/10"
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> Delete Task
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
-    </Card>
+    </div>
   );
 };
 

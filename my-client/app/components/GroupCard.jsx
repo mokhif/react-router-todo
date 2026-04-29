@@ -56,7 +56,7 @@ const GroupCard = ({ group }) => {
   });
   const handleEditing = () => setIsEditing(!isEditing);
   const handleUpdate = () => mutationUpdateGroup.mutate(_id);
-  //fetching TodosForSpecificGroup
+  //fetching Todos For Specific Group
   const { data: todos } = useQuery({
     queryKey: ["todos", _id],
     queryFn: () =>

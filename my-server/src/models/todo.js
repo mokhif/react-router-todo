@@ -13,6 +13,11 @@ const todoSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Group",
     },
+    description: {
+      type: String,
+      required: false,
+      default: "",
+    },
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",

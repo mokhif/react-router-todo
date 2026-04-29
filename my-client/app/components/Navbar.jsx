@@ -1,12 +1,9 @@
 import React from "react";
-import { useState } from "react";
 import { Button } from "./ui/button";
 import { LogOut } from "lucide-react";
 
 import CreateGroup from "./CreateGroup";
 const Navbar = ({ user, handleLogout }) => {
-  console.log("Is handleLogout a function?", typeof handleLogout);
-
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6">

@@ -5,6 +5,7 @@ import {
   getGroupTodo,
   deleteTodo,
   updateTodo,
+  reorderTodo,
 } from "../controllers/todoController.js";
 import protect from "../middleware/auth.js";
 
@@ -12,7 +13,8 @@ const router = express.Router();
 router.get("/:groupId", protect, getGroupTodo);
 router.get("/", protect, getTodos);
 router.post("/", protect, createTodo);
-router.delete("/:id", protect, deleteTodo);
+router.put("/reorderTodo", protect, reorderTodo);
 router.put("/:id", protect, updateTodo);
+router.delete("/:id", protect, deleteTodo);
 
 export default router;

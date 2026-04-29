@@ -245,7 +245,6 @@ const TodoItem = ({ todo, group }) => {
         </SheetContent>
       </Sheet>
 
-      {/* Dropdown Actions */}
       <div className="flex items-center gap-1 shrink-0 mt-0.5">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

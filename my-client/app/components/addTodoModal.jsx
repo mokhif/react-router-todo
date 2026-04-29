@@ -16,7 +16,7 @@ import { Plus } from "lucide-react";
 const AddTodoModal = ({ id }) => {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  
+
   // 1. Added State for description
   const [todoTitle, setTodoTitle] = useState("");
   const [todoDescription, setTodoDescription] = useState("");
@@ -26,10 +26,10 @@ const AddTodoModal = ({ id }) => {
       axios
         .post(
           "http://localhost:5000/todos",
-          { 
-            title: todoTitle, 
-            description: todoDescription, // 2. Added to payload
-            group: id 
+          {
+            title: todoTitle,
+            description: todoDescription, // 
+            group: id,
           },
           { withCredentials: true },
         )
@@ -37,7 +37,7 @@ const AddTodoModal = ({ id }) => {
     onSuccess: () => {
       queryClient.invalidateQueries(["todos", id]);
       setTodoTitle("");
-      setTodoDescription(""); // 3. Added to cleanup
+      setTodoDescription(""); 
       setOpen(false);
     },
   });
@@ -49,7 +49,7 @@ const AddTodoModal = ({ id }) => {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) { // Shift+Enter allows new lines in description if using textarea
+    if (e.key === "Enter" && !e.shiftKey) {
       handleSubmit();
     } else if (e.key === "Escape") {
       setOpen(false);
@@ -78,7 +78,9 @@ const AddTodoModal = ({ id }) => {
         <div className="flex flex-col gap-4 py-4">
           {/* Title Input */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-medium text-muted-foreground">Title</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Title
+            </label>
             <input
               type="text"
               value={todoTitle}
@@ -92,7 +94,9 @@ const AddTodoModal = ({ id }) => {
 
           {/* 4. Description Input */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-medium text-muted-foreground">Description (Optional)</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Description (Optional)
+            </label>
             <textarea
               value={todoDescription}
               onChange={(e) => setTodoDescription(e.target.value)}

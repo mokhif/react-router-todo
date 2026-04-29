@@ -115,12 +115,9 @@ const GroupCard = ({ group }) => {
               </Button>
             </div>
           ) : (
-            /* --- SHOW WHEN BROWSING --- */
             <>
-              {/* Keep the Add Button visible! */}
               <AddTodoModal id={_id} />
 
-              {/* Hide Group Edit/Delete in the 3-dot menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button

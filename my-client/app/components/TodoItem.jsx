@@ -72,7 +72,17 @@ const TodoItem = ({ todo, group }) => {
       queryClient.invalidateQueries(["todos", group._id]);
     },
   });
-
+  //update new listMutation
+  const mutationReorder = useMutation({
+    mutationFn: (idListArray) =>
+      axios.put(
+        "http://localhost:5000/todos/reorderTodo",
+        {
+          newOrder: idListArray.map((task) => task._id),
+        },
+        { withCredentials: true },
+      ),
+  });
   // Handlers
   const handleEditing = () => setIsEditing(true);
 
@@ -89,22 +99,71 @@ const TodoItem = ({ todo, group }) => {
   };
   //move up and down
   const moveUp = () => {
-    const currentTodos = queryClient.getQueryData(["todos", group._id]);
+    const data = queryClient.getQueryData(["todos", group._id]);
 
-    const i = currentTodos.findIndex((item) => item._id === _id);
-    if (i <= 0) return;
-    const newArray = [...currentTodos];
-    [newArray[i - 1], newArray[i]] = [newArray[i], newArray[i - 1]];
+    const index = data.findIndex((t) => t._id === _id);
+
+    if (index <= 0) return;
+
+    const newArray = [...data];
+
+    const [removedTask] = newArray.splice(index, 1);
+
+    newArray.splice(index - 1, 0, removedTask);
+
+    mutationReorder.mutate(newArray);
+    
     queryClient.setQueryData(["todos", group._id], newArray);
   };
+  //re order function mutation
+
   const moveDown = () => {
-    const currentTodos = queryClient.getQueryData(["todos", group._id]);
-    const i = currentTodos.findIndex((item) => item._id === _id);
-    if (i < 0 || i >= currentTodos.length - 1) return;
-    const newArray = [...currentTodos];
-    [newArray[i], newArray[i + 1]] = [newArray[i + 1], newArray[i]];
+    const data = queryClient.getQueryData(["todos", group._id]);
+    const index = data.findIndex((item) => item._id === _id);
+    if (index >= data.length - 1) return;
+
+    const newArray = [...data];
+
+    const [removedTask] = newArray.splice(index, 1);
+
+    newArray.splice(index + 1, 0, removedTask);
+    mutationReorder.mutate(newArray);
+
     queryClient.setQueryData(["todos", group._id], newArray);
   };
+  const moveTop = () => {
+    const data = queryClient.getQueryData(["todos", group._id]);
+
+    const index = data.findIndex((item) => item._id === _id);
+
+    if (index === 0) return;
+
+    const newArray = [...data];
+
+    const [removedTask] = newArray.splice(index, 1);
+
+    newArray.splice(0, 0, removedTask);
+    mutationReorder.mutate(newArray);
+
+    queryClient.setQueryData(["todos", group._id], newArray);
+  };
+  const moveBottom = () => {
+    const data = queryClient.getQueryData(["todos", group._id]);
+
+    const index = data.findIndex((item) => item._id === _id);
+
+    if (index >= data.length - 1) return;
+
+    const newArray = [...data];
+
+    const [removedTask] = newArray.splice(index, 1);
+
+    newArray.splice(newArray.length, 0, removedTask);
+    mutationReorder.mutate(newArray);
+
+    queryClient.setQueryData(["todos", group._id], newArray);
+  };
+
   return (
     <div className="group flex items-center gap-3 rounded-md border border-border bg-card px-3 py-2.5 shadow-sm transition-colors hover:bg-accent/50">
       {/* Checkbox */}
@@ -185,7 +244,7 @@ const TodoItem = ({ todo, group }) => {
               <DropdownMenuSeparator />
               <DropdownMenuLabel>Reorder</DropdownMenuLabel>
 
-              <DropdownMenuItem onClick={() => console.log("Top")}>
+              <DropdownMenuItem onClick={moveTop}>
                 <ChevronsUp className="mr-2 h-4 w-4" /> Move to Top
               </DropdownMenuItem>
               <DropdownMenuItem onClick={moveUp}>
@@ -194,7 +253,7 @@ const TodoItem = ({ todo, group }) => {
               <DropdownMenuItem onClick={moveDown}>
                 <ChevronDown className="mr-2 h-4 w-4" /> Move Down
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => console.log("Bottom")}>
+              <DropdownMenuItem onClick={moveBottom}>
                 <ChevronsDown className="mr-2 h-4 w-4" /> Move to Bottom
               </DropdownMenuItem>
 

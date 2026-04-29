@@ -23,6 +23,7 @@ const todoSchema = new Schema(
         isDone: { type: Boolean, default: false },
       },
     ],
+    position: { type: Number, default: Date.now() },
     dueDate: { type: Date, default: Date.now },
   },
   {

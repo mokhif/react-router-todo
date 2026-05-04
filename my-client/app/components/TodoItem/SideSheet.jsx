@@ -1,4 +1,5 @@
 import React from "react";
+import { useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -8,9 +9,94 @@ import {
   SheetTrigger,
   SheetFooter,
 } from "../ui/sheet";
-const Sheet = () => {
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "../ui/textarea";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { Trash2 } from "lucide-react";
+const SideSheet = ({ todo, group, setIsSheetOpen, isSheetOpen }) => {
+  //hooks
+  const queryClient = useQueryClient();
+  //statess
+  const [commentText, setCommentText] = useState("");
+  const [todoTitle, setTodoTitle] = useState(todo.title);
+  const [todoDescription, setTodoDescription] = useState(
+    todo.description || "",
+  );
+  const [targetGroupId, setTagetGroupId] = useState(group._id);
+  //fetching comments
+  const { data: comments } = useQuery({
+    queryKey: ["comments", todo._id],
+    queryFn: () =>
+      axios
+        .get(`http://localhost:5000/comments/${todo._id}`, {
+          withCredentials: true,
+        })
+        .then((res) => res.data),
+  });
+  //adding a  comments
+  const mutationAddComment = useMutation({
+    mutationFn: () =>
+      axios
+        .post(
+          `http://localhost:5000/comments`,
+          { content: commentText, todoId: todo._id },
+          { withCredentials: true },
+        )
+        .then((res) => res.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["comments", todo._id]);
+      setCommentText("");
+    },
+  });
+  //deleting comment
+  const mutationDeleteComment = useMutation({
+    mutationFn: (id) =>
+      axios.delete(`http://localhost:5000/comments/${id}`, {
+        withCredentials: true,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["comments", todo._id]);
+    },
+  });
+  /// Fetch all groups
+  const { data: allGroups } = useQuery({
+    queryKey: ["groups"],
+    queryFn: () =>
+      axios
+        .get("http://localhost:5000/group", { withCredentials: true })
+        .then((res) => res.data),
+  });
+  // updating todo (Title + Description)
+  const mutationUpdateTodoAndDescription = useMutation({
+    mutationFn: (id) =>
+      axios
+        .put(
+          `http://localhost:5000/todos/${id}`,
+          {
+            title: todoTitle,
+            description: todoDescription,
+            group: targetGroupId,
+          },
+          { withCredentials: true },
+        )
+        .then((res) => res.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["todos", group._id]);
+      setIsSheetOpen(false); // Close side panel on success
+    },
+  });
   return (
     <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
       <SheetTrigger asChild>
@@ -36,7 +122,7 @@ const Sheet = () => {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-6 py-4 overflow-y-auto max-h-[80vh]">
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
             <Input
@@ -58,7 +144,7 @@ const Sheet = () => {
           </div>
           <div className="space-y-2">
             <Label htmlFor="description">Groups</Label>
-            <Select value={tagetGroupId} onValueChange={setTagetGroupId}>
+            <Select value={targetGroupId} onValueChange={setTagetGroupId}>
               <SelectTrigger className="w-full max-w-48">
                 <SelectValue placeholder="Move To Group..." />
               </SelectTrigger>
@@ -80,14 +166,13 @@ const Sheet = () => {
                 {comments?.length || 0}
               </span>
             </div>
-
             {/* --- 2. COMMENTS LIST AREA --- */}
             <div className="flex-1 overflow-y-auto space-y-6 pr-2 min-h-0 mb-6 custom-scrollbar">
               {comments?.length > 0 ? (
                 comments.map((comment) => (
                   <div
                     key={comment._id}
-                    className="relative flex items-start gap-3"
+                    className="relative flex items-start gap-3 group/comment"
                   >
                     {/* Avatar Placeholder */}
                     <div className="h-7 w-7 rounded-full bg-secondary border flex items-center justify-center text-[10px] font-bold shrink-0">
@@ -95,14 +180,32 @@ const Sheet = () => {
                     </div>
 
                     <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold">
-                          {comment.user?.name || "Unknown User"}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">
-                          {new Date(comment.createdAt).toLocaleDateString()}
-                        </span>
+                      {/* Header Row: Name, Date, and Delete Button */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold">
+                            {comment.user?.name || "Unknown User"}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(comment.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+
+                        {/* DELETE COMMENT BUTTON */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 opacity-0 group-hover/comment:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                          onClick={() =>
+                            mutationDeleteComment.mutate(comment._id)
+                          }
+                          disabled={mutationDeleteComment.isPending}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
                       </div>
+
+                      {/* Comment Content */}
                       <div className="text-sm text-foreground bg-accent/30 p-2 rounded-md border border-border/50">
                         {comment.content}
                       </div>
@@ -147,10 +250,14 @@ const Sheet = () => {
         <SheetFooter className="mt-8">
           <Button
             className="w-full"
-            onClick={() => mutationUpdateTodo.mutate(_id)}
-            disabled={mutationUpdateTodo.isPending || !todoTitle.trim()}
+            onClick={() => mutationUpdateTodoAndDescription.mutate(todo._id)}
+            disabled={
+              mutationUpdateTodoAndDescription.isPending || !todoTitle.trim()
+            }
           >
-            {mutationUpdateTodo.isPending ? "Saving..." : "Save Changes"}
+            {mutationUpdateTodoAndDescription.isPending
+              ? "Saving..."
+              : "Save Changes"}
           </Button>
         </SheetFooter>
       </SheetContent>
@@ -158,4 +265,4 @@ const Sheet = () => {
   );
 };
 
-export default Sheet;
+export default SideSheet;

@@ -8,6 +8,7 @@ import { connectDB } from "./config/db.js";
 import { register, login, logout } from "./src/controllers/authController.js";
 import todoRouter from "./src/routes/todoRoutes.js";
 import groupRouter from "./src/routes/groupRoutes.js";
+import commentRouter from "./src/routes/commentsRoutes.js";
 const app = express();
 app.use(
   cors({
@@ -41,6 +42,8 @@ app.post("/logout", logout);
 app.use("/todos", todoRouter);
 //group crud section
 app.use("/group", groupRouter);
+//comment crud section
+app.use("/comments", commentRouter);
 // starting the server and connectinmg to the database
 connectDB().catch((error) => console.log(error));
 app.listen(port, () => console.log(`server is running on port:${port}`));

@@ -17,7 +17,7 @@ export const getGroupTodo = async (req, res) => {
   try {
     const { groupId } = req.params;
     const userId = req.user._id;
-    const todos = await Todo.find({ group: groupId, user: userId }).sort({ position: 1 });
+    const todos = await Todo.find({ group: groupId, /* user: userId */ }).sort({ position: 1 });
     res.status(200).json(todos);
   } catch (error) {
     res.status(400).json({ msg: `error ${error.message}` });
@@ -28,7 +28,7 @@ export const getTodos = async (req, res) => {
   try {
     const { groupId } = req.params;
     const todos = (
-      await Todo.find({ group: groupId, user: req.user._id })
+      await Todo.find({ group: groupId, /* user: req.user._id  */})
     ).sort({ position: 1 });
     res.status(200).json({ msg: "all todos", todos });
   } catch (error) {

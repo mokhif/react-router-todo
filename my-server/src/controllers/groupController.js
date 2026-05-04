@@ -13,7 +13,7 @@ export const createGroup = async (req, res) => {
 //requesting all group
 export const getUserGroups = async (req, res) => {
   try {
-    const group = await Group.find({ user: req.user._id });
+    const group = await Group.find({ /* user: req.user._id */ });
     res.status(200).json(group);
   } catch (error) {
     res.status(400).json({ msg: `error creating group ${error.message}` });

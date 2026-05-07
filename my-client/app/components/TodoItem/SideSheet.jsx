@@ -114,142 +114,176 @@ const SideSheet = ({ todo, group, setIsSheetOpen, isSheetOpen }) => {
         </div>
       </SheetTrigger>
 
-      <SheetContent side="right" className="w-full sm:max-w-md">
-        <SheetHeader className="mb-6">
-          <SheetTitle>Edit Task</SheetTitle>
+      {/* 1. LARGE WIDTH: Set to 850px for the "Workspace" feel */}
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-[850px] flex flex-col h-full p-0"
+      >
+        {/* FIXED HEADER */}
+        <SheetHeader className="px-8 py-6 border-b shrink-0">
+          <SheetTitle className="text-2xl font-bold tracking-tight">
+            Task Details
+          </SheetTitle>
           <SheetDescription>
-            Update the details for this task below.
+            View and edit all information related to this task.
           </SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-6 py-4 overflow-y-auto max-h-[80vh]">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={todoTitle}
-              onChange={(e) => setTodoTitle(e.target.value)}
-              placeholder="Task title..."
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={todoDescription}
-              onChange={(e) => setTodoDescription(e.target.value)}
-              placeholder="Add details about this task..."
-              className="min-h-37.5 resize-none"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="description">Groups</Label>
-            <Select value={targetGroupId} onValueChange={setTagetGroupId}>
-              <SelectTrigger className="w-full max-w-48">
-                <SelectValue placeholder="Move To Group..." />
-              </SelectTrigger>
-              <SelectContent>
-                {allGroups?.map((g) => (
-                  <SelectItem key={g._id} value={g._id}>
-                    {g.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="my-6 border-t border-border" />
+        {/* SINGLE SCROLL AREA */}
+        <div className="flex-1 overflow-y-auto px-8 py-8 space-y-10 custom-scrollbar">
+          {/* Inputs Section */}
+          <div className="space-y-6">
+            {/* TITLE BOX */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="title"
+                className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/80"
+              >
+                Task Title
+              </Label>
+              <Input
+                id="title"
+                value={todoTitle}
+                onChange={(e) => setTodoTitle(e.target.value)}
+                placeholder="What needs to be done?"
+                /* Subtle 1px border visible at all times */
+                className="text-lg font-medium border border-border/60 bg-background h-12 focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary"
+              />
+            </div>
 
-          <div className="flex flex-col flex-1 min-h-0 h-[calc(100vh-350px)] mt-4">
-            <div className="flex items-center gap-2 mb-4">
-              <h3 className="text-sm font-semibold">Activity</h3>
-              <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">
-                {comments?.length || 0}
+            {/* DESCRIPTION BOX */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="description"
+                className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/80"
+              >
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                value={todoDescription}
+                onChange={(e) => setTodoDescription(e.target.value)}
+                placeholder="Add a more detailed description..."
+                /* Subtle 1px border visible at all times, not too thick */
+                className="min-h-[200px] resize-none border border-border/60 bg-background p-4 text-base leading-relaxed focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary"
+              />
+            </div>
+
+            {/* LIST SELECTION */}
+            <div className="space-y-2">
+              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/80">
+                Current List
+              </Label>
+              <Select value={targetGroupId} onValueChange={setTagetGroupId}>
+                <SelectTrigger className="w-full max-w-[260px] h-10 border-border/60">
+                  <SelectValue placeholder="Select list..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {allGroups?.map((g) => (
+                    <SelectItem key={g._id} value={g._id}>
+                      {g.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* ACTIVITY SECTION */}
+          <div className="border-t border-border pt-10">
+            <div className="flex items-center gap-3 mb-8">
+              <h3 className="text-lg font-semibold">Activity</h3>
+              <span className="text-[11px] font-bold bg-secondary px-2.5 py-1 rounded-full text-secondary-foreground uppercase tracking-wider">
+                {comments?.length || 0} Comments
               </span>
             </div>
-            {/* --- 2. COMMENTS LIST AREA --- */}
-            <div className="flex-1 overflow-y-auto space-y-6 pr-2 min-h-0 mb-6 custom-scrollbar">
+
+            {/* COMMENTS LIST */}
+            <div className="space-y-8">
               {comments?.length > 0 ? (
                 comments.map((comment) => (
                   <div
                     key={comment._id}
-                    className="relative flex items-start gap-3 group/comment"
+                    className="relative flex items-start gap-4 group/comment"
                   >
-                    {/* Avatar Placeholder */}
-                    <div className="h-7 w-7 rounded-full bg-secondary border flex items-center justify-center text-[10px] font-bold shrink-0">
+                    <div className="h-9 w-9 rounded-full bg-secondary/80 border border-border/40 flex items-center justify-center text-xs font-bold shrink-0 shadow-sm">
                       {comment.user?.name?.charAt(0).toUpperCase() || "U"}
                     </div>
-
-                    <div className="flex-1 space-y-1">
-                      {/* Header Row: Name, Date, and Delete Button */}
+                    <div className="flex-1 space-y-1.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold">
-                            {comment.user?.name || "Unknown User"}
+                          <span className="text-sm font-bold">
+                            {comment.user?.name || "User"}
                           </span>
-                          <span className="text-[10px] text-muted-foreground">
+                          <span className="text-[10px] text-muted-foreground uppercase font-medium">
                             {new Date(comment.createdAt).toLocaleDateString()}
                           </span>
                         </div>
-
-                        {/* DELETE COMMENT BUTTON */}
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 opacity-0 group-hover/comment:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                          className="h-7 w-7 p-0 opacity-0 group-hover/comment:opacity-100 text-muted-foreground hover:text-destructive transition-all"
                           onClick={() =>
                             mutationDeleteComment.mutate(comment._id)
                           }
                           disabled={mutationDeleteComment.isPending}
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
-
-                      {/* Comment Content */}
-                      <div className="text-sm text-foreground bg-accent/30 p-2 rounded-md border border-border/50">
+                      <div className="text-sm leading-relaxed text-foreground bg-accent/10 p-3.5 rounded-lg border border-border/30 shadow-sm">
                         {comment.content}
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8">
-                  <p className="text-xs text-muted-foreground italic">
-                    No comments yet. Start the conversation!
+                <div className="flex flex-col items-center justify-center py-12 border border-dashed rounded-xl border-border/60 bg-accent/5">
+                  <p className="text-sm text-muted-foreground italic">
+                    No discussion yet. Start the conversation below.
                   </p>
                 </div>
               )}
             </div>
 
-            {/* --- 3. COMMENT INPUT AREA --- */}
-            <div className="space-y-3 pt-4 border-t border-border bg-background sticky bottom-0">
-              <div className="flex items-start gap-3">
-                <div className="h-7 w-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
+            {/* NEW COMMENT INPUT */}
+            <div className="space-y-4 pt-10 mt-10 border-t">
+              <div className="flex items-start gap-4">
+                <div className="h-9 w-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary shrink-0">
                   ME
                 </div>
-                <Textarea
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Add a comment..."
-                  className="min-h-[80px] text-sm resize-none focus-visible:ring-1"
-                />
-              </div>
-              <div className="flex justify-end">
-                <Button
-                  size="sm"
-                  onClick={() => mutationAddComment.mutate()}
-                  disabled={!commentText.trim() || mutationAddComment.isPending}
-                >
-                  {mutationAddComment.isPending ? "Sending..." : "Comment"}
-                </Button>
+                <div className="flex-1 space-y-3">
+                  <Textarea
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="Write a comment..."
+                    className="min-h-[100px] text-sm resize-none border border-border/60 bg-background focus-visible:ring-1 focus-visible:ring-primary/50"
+                  />
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      onClick={() => mutationAddComment.mutate()}
+                      disabled={
+                        !commentText.trim() || mutationAddComment.isPending
+                      }
+                      className="px-8 font-semibold shadow-sm"
+                    >
+                      {mutationAddComment.isPending
+                        ? "Sending..."
+                        : "Post Comment"}
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <SheetFooter className="mt-8">
+        {/* FIXED FOOTER */}
+        <SheetFooter className="px-8 py-6 border-t shrink-0 bg-background">
           <Button
-            className="w-full"
+            size="lg"
+            className="w-full text-base font-bold shadow-md"
             onClick={() => mutationUpdateTodoAndDescription.mutate(todo._id)}
             disabled={
               mutationUpdateTodoAndDescription.isPending || !todoTitle.trim()
@@ -257,7 +291,7 @@ const SideSheet = ({ todo, group, setIsSheetOpen, isSheetOpen }) => {
           >
             {mutationUpdateTodoAndDescription.isPending
               ? "Saving..."
-              : "Save Changes"}
+              : "Save All Changes"}
           </Button>
         </SheetFooter>
       </SheetContent>

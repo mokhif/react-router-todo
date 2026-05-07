@@ -60,7 +60,7 @@ const TodoItem = ({ todo, group }) => {
     newArray.splice(index - 1, 0, removed);
     syncOrder(newArray);
   };
-
+ 
   const moveDown = () => {
     const data = queryClient.getQueryData(["todos", group._id]);
     const index = data.findIndex((t) => t._id === _id);

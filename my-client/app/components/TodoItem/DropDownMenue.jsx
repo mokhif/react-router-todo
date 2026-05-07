@@ -17,7 +17,6 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 const DropDownMenue = ({
   mutationDeleteTodo,
   setIsSheetOpen,
@@ -26,7 +25,6 @@ const DropDownMenue = ({
   moveTop,
   moveBottom,
   todo,
-  group,
 }) => {
   return (
     <div className="flex items-center gap-1 shrink-0 mt-0.5">

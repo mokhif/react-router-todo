@@ -1,26 +1,13 @@
 import { Button } from "@/components/ui/button";
-import TodoItem from "./TodoItem";
-import {
-  CheckCheck,
-  MoreVertical,
-  Pencil,
-  Plus,
-  Trash2,
-  X,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "./ui/dropdown-menu";
+import { CheckCheck, X } from "lucide-react";
+import DropdownMenuComp from "./DropdownMenuComp";
+
 import axios from "axios";
 import { useState } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import AddTodoModal from "./AddTodoModal";
-import { Input } from "./ui/input";
+import AddTodoModal from "../AddTodoModal";
+import { Input } from "../ui/input";
+import TodoItemList from "./TodoItemList";
 const GroupCard = ({ group }) => {
   //hooks
   const { _id, title } = group;
@@ -64,6 +51,51 @@ const GroupCard = ({ group }) => {
         .get(`http://localhost:5000/todos/${_id}`, { withCredentials: true })
         .then((res) => res.data),
   });
+  //reorder handlers
+  const mutationReorderGroup = useMutation({
+    mutationFn: (GroupArray) =>
+      axios.put(
+        "http://localhost:5000/group/reorderGroup",
+        {
+          newArrCopy: GroupArray.map((g) => g._id),
+        },
+        { withCredentials: true },
+      ),
+  });
+  const moveLeft = () => {
+    const data = queryClient.getQueryData(["groups"]);
+    if (!data) return;
+    //finding the index of the card
+    const index = data.findIndex((g) => g._id === _id);
+    //if its on far left
+    if (index <= 0) return;
+
+    //create a copy and swap
+
+    const newArr = [...data];
+    const [removedGroup] = newArr.splice(index, 1);
+    //tell ui to update
+    newArr.splice(index - 1, 0, removedGroup);
+    //invoke backend to save
+    queryClient.setQueryData(["groups"], newArr);
+    mutationReorderGroup.mutate(newArr);
+  };
+  const moveRight = () => {
+    const data = queryClient.getQueryData(["groups"]);
+    if (!data) return;
+    //finding the index of the card
+    const index = data.findIndex((g) => g._id === _id);
+    //if its on far right
+    if (index >= data.length - 1) return;
+    //create a copy and swap
+    const newArr = [...data];
+    const [removedGroup] = newArr.splice(index, 1);
+    newArr.splice(index + 1, 0, removedGroup);
+    //tell ui to update
+    queryClient.setQueryData(["groups"], newArr);
+    //invoke backend to save
+    mutationReorderGroup.mutate(newArr);
+  };
   return (
     <div className="flex w-80 flex-shrink-0 flex-col rounded-lg border border-border bg-card shadow-sm">
       {/* HEADER SECTION */}
@@ -117,45 +149,21 @@ const GroupCard = ({ group }) => {
           ) : (
             <>
               <AddTodoModal id={_id} />
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 opacity-0 group-hover/header:opacity-100 transition-opacity"
-                  >
-                    <MoreVertical className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuLabel>Group Actions</DropdownMenuLabel>
-
-                  <DropdownMenuItem onClick={handleEditing}>
-                    <Pencil className="mr-2 h-4 w-4" /> Rename Group
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuItem
-                    onClick={() => mutationDeleteGroup.mutate(_id)}
-                    className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete Group
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <DropdownMenuComp
+                handleEditing={handleEditing}
+                _id={_id}
+                mutationUpdateGroup={mutationUpdateGroup}
+                mutationDeleteGroup={mutationDeleteGroup}
+                group={group}
+                todos={todos}
+                moveLeft={moveLeft}
+                moveRight={moveRight}
+              />
             </>
           )}
         </div>
       </div>
-
-      <div className="flex-1 space-y-2 overflow-y-auto p-4">
-        {todos?.map((todo) => (
-          <TodoItem key={todo._id} todo={todo} group={group} />
-        ))}
-      </div>
+      <TodoItemList todos={todos} group={group} />
     </div>
   );
 };

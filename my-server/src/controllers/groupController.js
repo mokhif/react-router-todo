@@ -30,8 +30,8 @@ export const reorderGroup = async (req, res) => {
       await Group.findByIdAndUpdate(groupId, {
         position: i,
       });
-      res.status(200).json({ msg: `Groups reordered Successfully` });
     }
+    res.status(200).json({ msg: `Groups reordered Successfully` });
   } catch (error) {
     res.status(400).json({ msg: `error creating group ${error.message}` });
   }

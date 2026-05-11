@@ -123,7 +123,7 @@ const SideSheet = ({ todo, group, setIsSheetOpen, isSheetOpen }) => {
   return (
     <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
       <SheetTrigger asChild>
-        <div className="flex flex-1 flex-col min-w-0 cursor-pointer text-left">
+        {/* <div className="flex flex-1 flex-col min-w-0 cursor-pointer text-left">
           <span
             className={`text-sm font-medium truncate ${todo.isDone ? "line-through text-muted-foreground" : "text-foreground"}`}
           >
@@ -134,7 +134,7 @@ const SideSheet = ({ todo, group, setIsSheetOpen, isSheetOpen }) => {
               {todo.description}
             </span>
           )}
-        </div>
+        </div> */}
       </SheetTrigger>
 
       <SheetContent

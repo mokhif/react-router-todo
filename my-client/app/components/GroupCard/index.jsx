@@ -62,7 +62,9 @@ const GroupCard = ({ group }) => {
         { withCredentials: true },
       ),
   });
-  const moveLeft = () => {
+  const moveLeft = async () => {
+    await queryClient.cancelQueries({ queryKey: ["groups"] });
+
     const data = queryClient.getQueryData(["groups"]);
     if (!data) return;
     //finding the index of the card
@@ -80,7 +82,9 @@ const GroupCard = ({ group }) => {
     queryClient.setQueryData(["groups"], newArr);
     mutationReorderGroup.mutate(newArr);
   };
-  const moveRight = () => {
+  const moveRight = async () => {
+    await queryClient.cancelQueries({ queryKey: ["groups"] });
+
     const data = queryClient.getQueryData(["groups"]);
     if (!data) return;
     //finding the index of the card

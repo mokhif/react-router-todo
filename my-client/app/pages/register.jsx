@@ -9,7 +9,7 @@ import { z } from "zod";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import axios from "axios";
 import { useNavigate } from "react-router";
-import { loginSchema } from "../lib/schemas/authSchema";
+import { registerSchema } from "../lib/schemas/authSchema";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ export default function Register() {
     handleSubmit,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(registerSchema),
   });
 
   const onSubmit = async (data) => {

@@ -22,6 +22,10 @@ const todoSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    assignedTo: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
     subtasks: [
       {
         title: { type: String },

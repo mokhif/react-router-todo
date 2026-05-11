@@ -17,9 +17,11 @@ export const getGroupTodo = async (req, res) => {
   try {
     const { groupId } = req.params;
     const userId = req.user._id;
-    const todos = await Todo.find({ group: groupId /* user: userId */ }).sort({
-      position: 1,
-    });
+    const todos = await Todo.find({ group: groupId /* user: userId */ })
+      .sort({
+        position: 1,
+      })
+      .populate("assignedTo","name" );
     res.status(200).json(todos);
   } catch (error) {
     res.status(400).json({ msg: `error ${error.message}` });
